@@ -48,7 +48,8 @@ async function apiFetch(path: string, init?: RequestInit) {
       ...getHeaders(),
       ...(init?.headers ?? {}),
     },
-    cache: 'no-store',
+    // default to cacheable unless a caller overrides it
+    cache: init?.cache ?? 'force-cache',
   });
 
   if (!res.ok) {
@@ -77,16 +78,29 @@ function getTotalCount(json: any, products: Product[]): number {
   return typeof total === 'number' ? total : products.length;
 }
 
-export async function getProducts(limit = 30, skip = 0): Promise<ProductsResponse> {
-  const json = await apiFetch(`/products?limit=${limit}&skip=${skip}`);
-  const products = getProductsArray(json);
+export async function getProducts(limit = 10, skip = 0): Promise<{ products: Product[]; total: number }> {
+  const safeLimit = Math.max(1, limit);
+  const safeSkip = Math.max(0, skip);
 
-  return {
-    products,
-    total: getTotalCount(json, products),
-    skip,
-    limit,
-  };
+  // if your API is page-based:
+  const page = Math.floor(safeSkip / safeLimit) + 1;
+
+  const json = await apiFetch(`/products?page=${page}&limit=${safeLimit}`);
+
+  // support both shapes:
+  // 1) { data: Product[], meta: { pagination: { total } } }
+  // 2) { data: { products: Product[], total } }
+  const dataNode = json?.data;
+  const products = Array.isArray(dataNode)
+    ? dataNode
+    : (dataNode?.products ?? []);
+
+  const total =
+    json?.meta?.pagination?.total ??
+    dataNode?.total ??
+    products.length;
+
+  return { products, total };
 }
 
 export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
@@ -147,40 +161,6 @@ export async function searchProducts(
     limit,
   };
 }
-
-// export async function searchProducts(query: string, limit = 5): Promise<ProductsResponse> {
-//   const res = await fetch(`${BASE_URL}/products`, {
-//     headers: {
-//       'x-vercel-protection-bypass': BYPASS_TOKEN!,
-//     },
-//   });
-//   if (!res.ok) throw new Error('Failed to search products');
-//   const json = await res.json();
-
-//   // Split query into words for word matching
-//   const words = query
-//     .toLowerCase()
-//     .split(/\s+/)
-//     .filter(Boolean);
-
-//   const filtered = json.data.filter((p: Product) => {
-//     const name = p.name.toLowerCase();
-//     const description = p.description.toLowerCase();
-//     // Match if any word is in name or description
-//     return (
-//       words.some((word) => name.includes(word) || description.includes(word)) ||
-//       name.includes(query.toLowerCase()) ||
-//       description.includes(query.toLowerCase())
-//     );
-//   });
-
-//   return {
-//     products: filtered.slice(0, limit),
-//     total: filtered.length,
-//     skip: 0,
-//     limit,
-//   };
-// }
 
 export async function getProductsByCategory(category: string): Promise<Product[]> {
   const json = await apiFetch('/products');

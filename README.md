@@ -82,4 +82,24 @@ If you see an error like:
 rm -rf .next
 npm run dev
 ```
+## Next.js dev cache/build errors Troubleshooting
 
+If you see errors like `routes-manifest.json` missing, `MODULE_NOT_FOUND`, or `.next/dev` write failures:
+
+````bash
+# 1) stop all running dev processes
+pkill -f "next dev" || true
+pkill -f "node.*next" || true
+
+# 2) clean build/cache
+rm -rf .next
+rm -rf node_modules/.cache
+
+# 3) ensure folder is writable
+mkdir -p .next/dev/cache
+chmod -R u+rwX .next
+
+# 3) If it still fails
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
