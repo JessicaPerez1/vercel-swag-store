@@ -12,6 +12,33 @@ function getBaseUrl(): string {
   return value.replace(/\/+$/, '');
 }
 
+export interface StoreFeatures {
+  wishlist: boolean;
+  productComparison: boolean;
+  reviews: boolean;
+  liveChat: boolean;
+  recentlyViewed: boolean;
+}
+
+export interface StoreSocialLinks {
+  twitter: string;
+  github: string;
+  discord: string;
+}
+
+export interface StoreSeo {
+  defaultTitle: string;
+  titleTemplate: string;
+  defaultDescription: string;
+}
+
+export interface StoreConfig {
+  storeName: string;
+  currency: string;
+  features: StoreFeatures;
+  socialLinks: StoreSocialLinks;
+  seo: StoreSeo;
+}
 
 export interface Product {
   id: string
@@ -184,4 +211,17 @@ export function formatPrice(price: number): string {
 export async function getProductStock(id: string): Promise<number> {
   const json = await apiFetch(`/products/${id}/stock`);
   return Number(json?.data?.stock ?? json?.stock ?? 0);
+}
+
+export async function getStoreConfig(): Promise<StoreConfig> {
+  const json = await apiFetch('/store/config', {
+    cache: 'force-cache',
+  });
+  const data = json?.data ?? json;
+
+  if (!data?.storeName || !data?.seo) {
+    throw new Error('Invalid store config payload');
+  }
+
+  return data as StoreConfig;
 }

@@ -1,131 +1,83 @@
 'use client';
 
-import { createContext, useContext, useCallback, useSyncExternalStore } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Product } from '@/lib/api';
 
-export interface CartItem {
-  product: Product
-  quantity: number
-}
+export type CartItem = {
+  product: Product;
+  quantity: number;
+};
 
-interface CartContextType {
-  items: CartItem[]
-  addItem: (product: Product, quantity: number) => void
-  updateQuantity: (productId: string, quantity: number) => void
-  removeItem: (productId: string) => void
-  totalItems: number
-  subtotal: number
-  clearCart: () => void
-}
+type CartContextType = {
+  items: CartItem[];
+  addItem: (product: Product, quantity: number) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  totalItems: number;
+  totalPrice: number;
+};
 
-const STORAGE_KEY = 'shop-cart';
-
-function getStoredCart(): CartItem[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (_error) {
-    // Ignore sessionStorage access errors (e.g. private browsing)
-  }
-  return [];
-}
-
-let listeners: Array<() => void> = [];
-let cartSnapshot: CartItem[] = getStoredCart();
-
-function emitChange() {
-  if (typeof window !== 'undefined') {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(cartSnapshot));
-  }
-  for (const listener of listeners) {
-    listener();
-  }
-}
-
-function subscribe(listener: () => void) {
-  listeners = [...listeners, listener];
-  return () => {
-    listeners = listeners.filter((l) => l !== listener);
-  };
-}
-
-function getSnapshot(): CartItem[] {
-  return cartSnapshot;
-}
-
-const SERVER_SNAPSHOT: CartItem[] = [];
-function getServerSnapshot(): CartItem[] {
-  return SERVER_SNAPSHOT;
-}
-
+const STORAGE_KEY = 'vswag-cart';
 const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const items = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [items, setItems] = useState<CartItem[]>([]);
 
-  const addItem = useCallback((product: Product, quantity: number) => {
-    const existing = cartSnapshot.find((item) => item.product.id === product.id);
-    if (existing) {
-      cartSnapshot = cartSnapshot.map((item) =>
-        item.product.id === product.id
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
-      );
-    } else {
-      cartSnapshot = [...cartSnapshot, { product, quantity }];
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (raw) setItems(JSON.parse(raw) as CartItem[]);
+    } catch {
+      setItems([]);
     }
-    emitChange();
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      cartSnapshot = cartSnapshot.filter((item) => item.product.id !== productId);
-    } else {
-      cartSnapshot = cartSnapshot.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
-      );
-    }
-    emitChange();
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch {}
+  }, [items]);
+
+  const addItem = useCallback((product: Product, quantity: number) => {
+    setItems((prev) => {
+      const existing = prev.find((i) => i.product.id === product.id);
+      if (existing) {
+        return prev.map((i) =>
+          i.product.id === product.id ? { ...i, quantity: i.quantity + quantity } : i
+        );
+      }
+      return [...prev, { product, quantity }];
+    });
   }, []);
 
   const removeItem = useCallback((productId: string) => {
-    cartSnapshot = cartSnapshot.filter((item) => item.product.id !== String(productId));
-    emitChange();
+    setItems((prev) => prev.filter((i) => i.product.id !== productId));
   }, []);
 
-  const clearCart = useCallback(() => {
-    cartSnapshot = [];
-    emitChange();
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
+    setItems((prev) =>
+      prev
+        .map((i) => (i.product.id === productId ? { ...i, quantity: Math.max(0, quantity) } : i))
+        .filter((i) => i.quantity > 0)
+    );
   }, []);
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
+  const clearCart = useCallback(() => setItems([]), []);
+
+  const totalItems = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
+  const totalPrice = useMemo(() => items.reduce((sum, i) => sum + i.product.price * i.quantity, 0), [items]);
+
+  const value = useMemo(
+    () => ({ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice }),
+    [items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice]
   );
 
-  return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        updateQuantity,
-        removeItem,
-        totalItems,
-        subtotal,
-        clearCart,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
-export function useCart(): CartContextType {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
+export function useCart() {
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error('useCart must be used within CartProvider');
+  return ctx;
 }
