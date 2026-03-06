@@ -15,20 +15,20 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function CartSheet() {
-  const { items, updateQuantity, removeItem, subtotal } = useCart();
+  const { items, updateQuantity, removeItem, totalPrice, totalItems } = useCart();
 
   return (
     <SheetContent className="flex w-full flex-col sm:max-w-md" side="right">
       <SheetHeader>
         <SheetTitle className="text-lg">Shopping Cart</SheetTitle>
         <SheetDescription>
-          {items.length === 0
+          {totalItems === 0
             ? 'Your cart is empty'
-            : `${items.length} item${items.length > 1 ? 's' : ''} in your cart`}
+            : `${totalItems} item${totalItems > 1 ? 's' : ''} in your cart`}
         </SheetDescription>
       </SheetHeader>
 
-      {items.length === 0 ? (
+      {totalItems === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
           <p className="text-sm text-muted-foreground">
             No items in your cart yet.
@@ -60,7 +60,7 @@ export function CartSheet() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center rounded-md border border-border">
+                                            <div className="flex items-center rounded-md border border-border">
                         <button
                           onClick={() =>
                             updateQuantity(item.product.id, item.quantity - 1)
@@ -77,7 +77,8 @@ export function CartSheet() {
                           onClick={() =>
                             updateQuantity(item.product.id, item.quantity + 1)
                           }
-                          className="flex size-7 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                          disabled={typeof item.maxStock === 'number' && item.quantity >= item.maxStock}
+                          className="flex size-7 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
                           aria-label="Increase quantity"
                         >
                           <Plus className="size-3" />
@@ -103,11 +104,9 @@ export function CartSheet() {
           <SheetFooter className="border-t border-border">
             <div className="flex w-full flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">
-                  Subtotal
-                </span>
+                <span className="text-sm font-medium text-foreground">Subtotal</span>
                 <span className="text-base font-semibold text-foreground">
-                  {formatPrice(subtotal)}
+                  {formatPrice(totalPrice)}
                 </span>
               </div>
               <Button className="w-full" size="lg">

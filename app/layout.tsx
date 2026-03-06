@@ -57,15 +57,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
-        <Suspense fallback={<>{children}</>}>
-          <CartProvider>
+        <CartProvider>
+          <Suspense fallback={null}>
             <div className="flex min-h-screen flex-col">
               <SiteHeader />
               <main className="flex-1">{children}</main>
               <SiteFooter />
             </div>
-          </CartProvider>
-        </Suspense>
+          </Suspense>
+        </CartProvider>
         <Analytics />
       </body>
     </html>
