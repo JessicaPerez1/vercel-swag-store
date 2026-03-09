@@ -1,27 +1,8 @@
 import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { getCategories } from '@/lib/server-api';
 import { SearchResults } from '@/components/search-results';
-
-//Deferred search controls on the search page with dynamic imports: load SearchForm and CategoryFilter as separate chunks with skeleton fallbacks.
-const SearchForm = dynamic(
-  () => import('@/components/search-form').then((mod) => mod.SearchForm),
-  {
-    loading: () => (
-      <div className="h-10 w-full animate-pulse rounded-md bg-gray-200 dark:bg-gray-700" />
-    ),
-  }
-);
-
-const CategoryFilter = dynamic(
-  () => import('@/components/category-filter').then((mod) => mod.CategoryFilter),
-  {
-    loading: () => (
-      <div className="h-10 w-48 animate-pulse rounded-md bg-gray-200 dark:bg-gray-700" />
-    ),
-  }
-);
+import { SearchControlsClient } from '@/components/search-controls-client';
 
 export const metadata: Metadata = {
   title: 'Search Products',
@@ -80,12 +61,7 @@ async function SearchPageContent({ searchParams }: SearchPageProps) {
           </p>
         </div>
 
-        <div className="mb-8 flex flex-col gap-4 rounded-lg bg-gray-100 p-4 text-foreground dark:bg-gray-800 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <SearchForm />
-          </div>
-          <CategoryFilter categories={categories} />
-        </div>
+        <SearchControlsClient categories={categories} />
 
         <Suspense fallback={<ResultsSkeleton />}>
           <SearchResults query={q} category={category} />
