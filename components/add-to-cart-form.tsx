@@ -59,7 +59,7 @@ export function AddToCartForm({ product, stock }: AddToCartFormProps) {
                 : `${safeStock} in stock`}
         </span>
       </div>
-      
+
       {/* Quantity selector */}
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium text-foreground">Quantity</span>

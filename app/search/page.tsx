@@ -3,20 +3,23 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { getCategories } from '@/lib/server-api';
 import { SearchResults } from '@/components/search-results';
-import { Skeleton } from '@/components/ui/skeleton';
 
 //Deferred search controls on the search page with dynamic imports: load SearchForm and CategoryFilter as separate chunks with skeleton fallbacks.
 const SearchForm = dynamic(
   () => import('@/components/search-form').then((mod) => mod.SearchForm),
   {
-    loading: () => <Skeleton className="h-10 w-full" />,
+    loading: () => (
+      <div className="h-10 w-full animate-pulse rounded-md bg-gray-200 dark:bg-gray-700" />
+    ),
   }
 );
 
 const CategoryFilter = dynamic(
   () => import('@/components/category-filter').then((mod) => mod.CategoryFilter),
   {
-    loading: () => <Skeleton className="h-10 w-48" />,
+    loading: () => (
+      <div className="h-10 w-48 animate-pulse rounded-md bg-gray-200 dark:bg-gray-700" />
+    ),
   }
 );
 
@@ -77,15 +80,11 @@ async function SearchPageContent({ searchParams }: SearchPageProps) {
           </p>
         </div>
 
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end">
+        <div className="mb-8 flex flex-col gap-4 rounded-lg bg-gray-100 p-4 text-foreground dark:bg-gray-800 sm:flex-row sm:items-end">
           <div className="flex-1">
-            <Suspense>
-              <SearchForm />
-            </Suspense>
+            <SearchForm />
           </div>
-          <Suspense>
-            <CategoryFilter categories={categories} />
-          </Suspense>
+          <CategoryFilter categories={categories} />
         </div>
 
         <Suspense fallback={<ResultsSkeleton />}>

@@ -89,7 +89,15 @@ async function ProductPageContent({ params }: ProductPageProps) {
 
 export default function ProductPage(props: ProductPageProps) {
   return (
-    <Suspense fallback={<div>Loading product...</div>}>
+    <Suspense
+      fallback={(
+        <div className="flex min-h-[50vh] items-center justify-center px-4">
+          <div className="text-center text-2xl font-semibold tracking-tight text-foreground animate-pulse lg:text-3xl">
+            Loading product...
+          </div>
+        </div>
+      )}
+    >
       <ProductPageContent {...props} />
     </Suspense>
   );
