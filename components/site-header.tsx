@@ -1,12 +1,18 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ShoppingBag, Menu, X, Triangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetTrigger} from '@/components/ui/sheet';
-import { CartSheet } from '@/components/cart-sheet';
+
+//Deferred cart drawer code until user opens cart: CartSheet is now dynamically imported (ssr: false) and only mounted when the sheet is open.
+const CartSheet = dynamic(
+  () => import('@/components/cart-sheet').then((mod) => mod.CartSheet),
+  { ssr: false }
+);
 
 const SEARCH_LABEL = 'Search';
 
@@ -14,6 +20,7 @@ export function SiteHeader() {
   const { totalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -48,7 +55,7 @@ export function SiteHeader() {
         {/* Actions */}
         <div className="flex items-center gap-2">
 
-          <Sheet>
+          <Sheet open={cartOpen} onOpenChange={setCartOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="relative" aria-label="Open cart">
                 <ShoppingBag className="size-5" />
@@ -59,7 +66,7 @@ export function SiteHeader() {
                 )}
               </Button>
             </SheetTrigger>
-            <CartSheet />
+            {cartOpen ? <CartSheet /> : null}
           </Sheet>
 
           {/* Mobile Menu Toggle */}

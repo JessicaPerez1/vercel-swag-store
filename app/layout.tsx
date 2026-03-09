@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { CartProvider } from '@/lib/cart-context';
 import { SiteHeader } from '@/components/site-header';
@@ -9,10 +9,6 @@ import { Suspense } from 'react';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getStoreConfig().catch(() => null);
@@ -56,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased`}>
         <CartProvider>
           <Suspense fallback={null}>
             <div className="flex min-h-screen flex-col">

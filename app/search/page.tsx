@@ -1,10 +1,24 @@
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { getCategories } from '@/lib/server-api';
-import { SearchForm } from '@/components/search-form';
-import { CategoryFilter } from '@/components/category-filter';
 import { SearchResults } from '@/components/search-results';
 import { Skeleton } from '@/components/ui/skeleton';
+
+//Deferred search controls on the search page with dynamic imports: load SearchForm and CategoryFilter as separate chunks with skeleton fallbacks.
+const SearchForm = dynamic(
+  () => import('@/components/search-form').then((mod) => mod.SearchForm),
+  {
+    loading: () => <Skeleton className="h-10 w-full" />,
+  }
+);
+
+const CategoryFilter = dynamic(
+  () => import('@/components/category-filter').then((mod) => mod.CategoryFilter),
+  {
+    loading: () => <Skeleton className="h-10 w-48" />,
+  }
+);
 
 export const metadata: Metadata = {
   title: 'Search Products',
@@ -19,18 +33,20 @@ export const metadata: Metadata = {
 
 function ResultsSkeleton() {
   return (
-    <div className="flex flex-col gap-4">
-      <Skeleton className="h-4 w-48" />
+    <div>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Loading products...
+      </p>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
+        {Array.from({ length: 10 }).map((_, i) => (
           <div
             key={i}
-            className="flex flex-col overflow-hidden rounded-lg border border-border"
+            className="flex flex-col overflow-hidden rounded-lg border border-border bg-gray-100 dark:bg-gray-800"
           >
-            <Skeleton className="aspect-square w-full" />
-            <div className="p-4">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="mt-2 h-4 w-1/4" />
+            <div className="relative aspect-square overflow-hidden bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            <div className="flex flex-col gap-2 p-4">
+              <div className="h-4 w-3/4 rounded bg-gray-300 dark:bg-gray-600 animate-pulse" />
+              <div className="h-4 w-1/3 rounded bg-gray-300 dark:bg-gray-600 animate-pulse" />
             </div>
           </div>
         ))}
@@ -81,9 +97,5 @@ async function SearchPageContent({ searchParams }: SearchPageProps) {
 }
 
 export default function SearchPage(props: SearchPageProps) {
-  return (
-    <Suspense fallback={<ResultsSkeleton />}>
-      <SearchPageContent {...props} />
-    </Suspense>
-  );
+  return <SearchPageContent {...props} />;
 }

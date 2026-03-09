@@ -8,6 +8,19 @@
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
+  "browserslist": {
+    "production": [
+      "chrome >= 111",
+      "edge >= 111",
+      "firefox >= 113",
+      "safari >= 16.4"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.12",

@@ -95,10 +95,6 @@ pkill -f "node.*next" || true
 rm -rf .next
 rm -rf node_modules/.cache
 
-# 3) ensure folder is writable
-mkdir -p .next/dev/cache
-chmod -R u+rwX .next
-
 # 3) If it still fails
 rm -rf node_modules package-lock.json
 npm install
