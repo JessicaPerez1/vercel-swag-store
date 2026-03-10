@@ -1,4 +1,4 @@
-const BYPASS_TOKEN = process.env.VERCEL_PROTECTION_BYPASS;
+const BYPASS_TOKEN = process.env.PROTECTION_BYPASS;
 
 function getBaseUrl(): string {
   const value =

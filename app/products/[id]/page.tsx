@@ -36,7 +36,7 @@ async function ProductPageContent({ params }: ProductPageProps) {
           {/* Product Image */}
           <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-secondary">
             <Image
-              src={`/api/image-proxy?url=${encodeURIComponent(product.images[0])}`}
+              src={product.images[0]}
               alt={product.name || product.description   || (product.category ? `Product in category ${product.category}` : 'Product image')}
               width={638}
               height={638}

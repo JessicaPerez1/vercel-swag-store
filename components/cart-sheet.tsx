@@ -42,7 +42,7 @@ export function CartSheet() {
                 <div key={item.product.id} className="flex gap-4">
                   <div className="relative size-20 shrink-0 overflow-hidden rounded-md border border-border bg-secondary">
                     <Image
-                      src={`/api/image-proxy?url=${encodeURIComponent(item.product.images[0])}`}
+                      src={item.product.images[0]}
                       alt={item.product.name}
                       className="object-cover w-full h-auto"
                       width={80}

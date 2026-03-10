@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const BASE_URL = 'https://vercel-swag-store-api.vercel.app/api';
-const BYPASS_TOKEN = process.env.VERCEL_PROTECTION_BYPASS;
+const BYPASS_TOKEN = process.env.PROTECTION_BYPASS;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

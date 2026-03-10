@@ -18,7 +18,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       <div className="relative aspect-square overflow-hidden bg-secondary">
         {imageUrl ? (
           <Image
-            src={`/api/image-proxy?url=${encodeURIComponent(imageUrl)}`}
+            src={imageUrl}
             alt={product.name}
             className="object-cover w-full h-auto transition-transform duration-300 group-hover:scale-105"
             sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"

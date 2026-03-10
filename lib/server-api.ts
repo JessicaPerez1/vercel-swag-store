@@ -1,7 +1,7 @@
 'use cache';
 
 import { Product } from './api';
-const BYPASS_TOKEN = process.env.VERCEL_PROTECTION_BYPASS;
+const BYPASS_TOKEN = process.env.PROTECTION_BYPASS;
 const BASE_URL = 'https://vercel-swag-store-api.vercel.app/api';
 
 export async function getCategories(): Promise<{ slug: string; name: string; url: string }[]> {
