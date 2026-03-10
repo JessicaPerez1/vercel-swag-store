@@ -1,5 +1,7 @@
 # vercel-swag-store
 
+> Note: This app was built using [v0.app](https://v0.app).
+
 ## Getting Started
 
 ### Prerequisites
